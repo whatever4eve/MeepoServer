@@ -28,4 +28,6 @@ def signup(request):
 
     return HttpResponse(dumps(a))
     
-    
+@csrf_exempt    
+def signin(request):
+    return HttpResponse("123")

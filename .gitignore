@@ -46,7 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-
+db.sqlite3
 *.pyc
 *.pyo
 db.sqlite3

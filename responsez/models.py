@@ -10,3 +10,12 @@ from rest_framework.authtoken.models import Token
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+class UserProfile(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	city = models.CharField(max_length=30)
+	birthdate = models.DateField()
+	bio = models.CharField(max_length=250)
+	def __str__(self):
+		return self.user.username

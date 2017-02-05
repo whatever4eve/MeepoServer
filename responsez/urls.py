@@ -7,5 +7,5 @@ urlpatterns = [
     url(r'^signup/',views.signup,name='signup'),
     url(r'^signin/',tviews.obtain_auth_token,name='signin'),
     url(r'^myprofile/',views.myprofile,name='profile'),
-    url(r'^allusers/'views.getAllusers,name='appusers'),
+    url(r'^allusers/',views.getAllusers,name='appusers'),
 ]

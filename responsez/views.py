@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view,authentication_classes,permission_classes
 # Create your views here.
-
+import random
 
 
 
@@ -47,3 +47,16 @@ def myprofile(request):
     data['name'] = request.user.first_name + ' ' +request.user.last_name
     return HttpResponse(dumps(data))
 
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def getAllusers(request):
+	data =[]
+	for user in User.objects.all():
+		dic={}
+		dic['username'] = user.username
+		dic['fullname'] = user.first_name + ' ' + user.last_name
+		dic['isfriend'] = random.choice([True,False])
+		data.append(dic)
+
+	return HttpResponse(dumps(data))

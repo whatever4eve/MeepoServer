@@ -44,15 +44,6 @@ def signup(request):
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
-def myprofile(request):
-    data = {}
-    data['username'] = request.user.username
-    data['name'] = request.user.first_name + ' ' +request.user.last_name
-    return HttpResponse(dumps(data))
-
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
 def getAllusers(request):
     data = renderuserlist(request, User.objects.all())
     return HttpResponse(dumps(data))

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -27,6 +27,9 @@ def signup(request):
     try:
     	user = User.objects.create_user(username,email,password)
     	a['status'] = "success"
+        user.first_name = "baruch"
+        user.last_name = "varzil"
+        user.save()
         profile = UserProfile(user=user,city="jers",birthdate=timezone.now(),bio="anal sex")
         profile.save()
     except IntegrityError:
@@ -51,12 +54,50 @@ def myprofile(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getAllusers(request):
-	data =[]
-	for user in User.objects.all():
-		dic={}
-		dic['username'] = user.username
-		dic['fullname'] = user.first_name + ' ' + user.last_name
-		dic['isfriend'] = random.choice([True,False])
-		data.append(dic)
+    data = renderuserlist(request, User.objects.all())
+    return HttpResponse(dumps(data))
 
-	return HttpResponse(dumps(data))
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def userinfo(request,username):
+    user = get_object_or_404(User,username=username)
+    data = {}
+    data['username'] = user.username
+    data['name'] = user.first_name + ' ' + user.last_name
+    data['isfriend'] = user.userprofile in request.user.userprofile.friends.all() or user.username == request.user.username
+    return HttpResponse(dumps(data))
+
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def userfriends(request,username):
+    user = get_object_or_404(User,username=username)
+    data = renderuserlist(request,map(lambda x:x.user,user.userprofile.friends.all()))
+    return HttpResponse(dumps(data))
+
+
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def addfriend(request,username):
+    sender = request.user
+    user = get_object_or_404(User,username=username)
+    if not user.userprofile in sender.userprofile.friends.all():
+        sender.userprofile.friends.add(user.userprofile)
+    return HttpResponse("1")
+
+
+def renderuserlist(request,lst):
+    data = []
+    friends = request.user.userprofile.friends.all()
+    for user in lst:
+        dic={}
+        dic['username'] = user.username
+        dic['fullname'] = user.first_name + ' ' + user.last_name
+        dic['isfriend'] = user.userprofile in friends or user.username == request.user.username
+        data.append(dic) 
+    return data

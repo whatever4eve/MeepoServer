@@ -17,5 +17,6 @@ class UserProfile(models.Model):
 	city = models.CharField(max_length=30)
 	birthdate = models.DateField()
 	bio = models.CharField(max_length=250)
+	friends = models.ManyToManyField("self",symmetrical=True)
 	def __str__(self):
 		return self.user.username

@@ -11,7 +11,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view,authentication_classes,permission_classes
 # Create your views here.
 import random
-
+import datetime
 
 
 def index(request):
@@ -23,18 +23,23 @@ def signup(request):
     username = request.POST['username']
     password = request.POST['password']
     email = request.POST['email']
-    a = {"status":""}
+    city = request.POST['city']
+    firstName = request.POST['firstName']
+    lastName = request.POST['lastName']
+    birthDate = request.POST['birthdate']
+    birthDate = datetime.date(int(birthDate[6:10]),int(birthDate[0:2]),int(birthDate[3:5]))
+    data = {"status":""}
     try:
     	user = User.objects.create_user(username,email,password)
-    	a['status'] = "success"
-        user.first_name = "baruch"
-        user.last_name = "varzil"
+    	data['status'] = "success"
+        user.first_name = firstName
+        user.last_name = lastName
         user.save()
-        profile = UserProfile(user=user,city="jers",birthdate=timezone.now(),bio="anal sex")
+        profile = UserProfile(user=user,city=city,birthdate=birthDate,bio="i enjoy to watch the sky")
         profile.save()
     except IntegrityError:
-    	a['status'] = "userexists"
-    	a['user'] = username
+    	data['status'] = "userexists"
+    	data['user'] = username
     #except:
     #	a['status'] = "wrong"
 

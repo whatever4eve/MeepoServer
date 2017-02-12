@@ -20,3 +20,13 @@ class UserProfile(models.Model):
 	friends = models.ManyToManyField("self",symmetrical=True)
 	def __str__(self):
 		return self.user.username
+
+msgType = (
+    (0, 'addFriend'),
+    (1, 'message'),
+    (2, 'eventInvite')
+	)
+
+class Notification(models.Model):
+	typeNof = models.IntegerField(choices=msgType)
+	userCaused = models.ForeignKey('UserProfile',on_delete=models.CASCADE)

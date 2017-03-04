@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
 from django.utils import timezone
 from json import dumps
-from .models import UserProfile
+from .models import UserProfile, Notification
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view,authentication_classes,permission_classes
@@ -43,8 +43,23 @@ def signup(request):
     #except:
     #	a['status'] = "wrong"
 
-    return HttpResponse(dumps(a))
+    return HttpResponse(dumps(data))
 
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def getNotifications(request):
+    notifs = Notification.objects.all();
+    notifs = filter(lambda x: x.toUser == request.user, notifs)
+    return HttpResponse(dumps(notifs))
+
+@api_view(['POST'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def addNotifications(request):
+    notif = Notification(typeNof= '1' , userCaused= request.user , toUser = request.)
+    notifs = filter(lambda x: x.toUser == request.user, notifs)
+    return HttpResponse(dumps(notifs))
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))

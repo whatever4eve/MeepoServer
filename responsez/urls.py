@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^(?P<username>[a-zA-Z0-9_]{3,12})/info/',views.userinfo,name='userinfo'),
     url(r'^(?P<username>[a-zA-Z0-9_]{3,12})/friends/',views.userfriends,name='userfriends'),
     url(r'^(?P<username>[a-zA-Z0-9_]{3,12})/addfriend/',views.addfriend,name='addfriend'),
+    url(r'^notifications/',views.getNotifications,name='notifics'),
 ]

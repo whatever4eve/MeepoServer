@@ -29,4 +29,5 @@ msgType = (
 
 class Notification(models.Model):
 	typeNof = models.IntegerField(choices=msgType)
-	userCaused = models.ForeignKey('UserProfile',on_delete=models.CASCADE)
+	toUser = models.ForeignKey(User, on_delete=models.CASCADE)
+	userCaused = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

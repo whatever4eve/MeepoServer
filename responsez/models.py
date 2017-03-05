@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-
+from datetime import date
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
@@ -20,6 +20,29 @@ class UserProfile(models.Model):
 	friends = models.ManyToManyField("self",symmetrical=True)
 	def __str__(self):
 		return self.user.username
+    #takes a user,return a dict
+	def basic_info(self, asker=None):
+		data = {}
+		data['username'] = self.user.username
+		data['fullname'] = self.user.first_name + ' ' + self.user.last_name
+		if asker:
+			data['isfriend'] = self.user.userprofile in asker.userprofile.friends.all() or self.user.username == asker.username
+		else:
+			data['isfriend'] = False
+		return data
+	#takes a user, return a dict
+	def advanced_info(self,asker=None):
+		data = self.basic_info(asker)
+		data['age'] = self.age()
+		data['bio'] = self.bio
+		data['city'] = self.city
+		return data
+
+	def age(self):
+		birthdate = self.birthdate
+		today = date.today()
+		return today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+
 
 msgType = (
     (0, 'addFriend'),

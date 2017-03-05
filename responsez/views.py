@@ -57,7 +57,7 @@ def getNotifications(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def addNotifications(request):
-    notif = Notification(typeNof= '1' , userCaused= request.user , toUser = request.)
+    notif = Notification(typeNof= '1' , userCaused= request.user , toUser = request.user)
     notifs = filter(lambda x: x.toUser == request.user, notifs)
     return HttpResponse(dumps(notifs))
 
@@ -74,11 +74,7 @@ def getAllusers(request):
 @permission_classes((IsAuthenticated,))
 def userinfo(request,username):
     user = get_object_or_404(User,username=username)
-    data = {}
-    data['username'] = user.username
-    data['name'] = user.first_name + ' ' + user.last_name
-    data['isfriend'] = user.userprofile in request.user.userprofile.friends.all() or user.username == request.user.username
-    return HttpResponse(dumps(data))
+    return HttpResponse(dumps(user.UserProfile.advanced_info(request.user)))
 
 
 @api_view(['GET'])
@@ -106,9 +102,6 @@ def renderuserlist(request,lst):
     data = []
     friends = request.user.userprofile.friends.all()
     for user in lst:
-        dic={}
-        dic['username'] = user.username
-        dic['fullname'] = user.first_name + ' ' + user.last_name
-        dic['isfriend'] = user.userprofile in friends or user.username == request.user.username
+    	dic = user.basic_info(asker=request.user)
         data.append(dic) 
     return data

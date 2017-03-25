@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-from datetime import date
+from datetime import date,datetime
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
@@ -46,7 +46,7 @@ class UserProfile(models.Model):
 
 msgType = (
     (0, 'addFriend'),
-    (1, 'message'),
+    (1, 'friendship_accomplished'),
     (2, 'eventInvite')
 	)
 
@@ -54,3 +54,25 @@ class Notification(models.Model):
 	typeNof = models.IntegerField(choices=msgType)
 	toUser = models.ForeignKey(User, on_delete=models.CASCADE)
 	userCaused = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+	date = models.DateTimeField(default=datetime.now())
+
+	def get_info(self):
+		data = []
+		data['sender'] = self.userCaused.basic_info(asker=self.toUser)
+		data['type'] = self.typeNof
+
+	def time_ago(self):
+		now = datetime.now()
+		date = self.date
+		dt = now-date
+		if dt.days > 0:
+			return str(dt.days) + 'd'
+		if dt.seconds > 3600:
+			return str(dt.seconds/3600) +'h'
+		if dt.seconds > 60:
+			return str(dt.seconds/60) + 'm'
+		if dt.seconds < 60:
+			return "now"
+		return "???"
+
+

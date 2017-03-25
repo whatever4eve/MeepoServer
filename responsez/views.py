@@ -49,17 +49,10 @@ def signup(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getNotifications(request):
-    notifs = Notification.objects.all();
+    notifs = Notification.objects.all()
     notifs = filter(lambda x: x.toUser == request.user, notifs)
     return HttpResponse(dumps(notifs))
 
-@api_view(['POST'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
-def addNotifications(request):
-    notif = Notification(typeNof= '1' , userCaused= request.user , toUser = request.user)
-    notifs = filter(lambda x: x.toUser == request.user, notifs)
-    return HttpResponse(dumps(notifs))
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -100,7 +93,6 @@ def addfriend(request,username):
 
 def renderuserlist(request,lst):
     data = []
-    friends = request.user.userprofile.friends.all()
     for user in lst:
     	dic = user.basic_info(asker=request.user)
         data.append(dic) 

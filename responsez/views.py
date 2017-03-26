@@ -13,11 +13,6 @@ from rest_framework.decorators import api_view,authentication_classes,permission
 import random
 import datetime
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
-
-
 @csrf_exempt
 def signup(request):
     username = request.POST['username']
@@ -49,16 +44,15 @@ def signup(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getNotifications(request):
-    notifs = Notification.objects.all()
-    notifs = filter(lambda x: x.toUser == request.user, notifs)
-    return HttpResponse(dumps(notifs))
+    notifs = Notification.objects.filter(toUser=request.user)
+    return HttpResponse(dumps(map(lambda x:x.get_info(),notifs)))
 
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getAllusers(request):
-    data = renderuserlist(request, User.objects.all())
+    data = map(lambda x:x.basic_info(asker=request.user),UserProfile.objects.all())
     return HttpResponse(dumps(data))
 
 
@@ -67,7 +61,7 @@ def getAllusers(request):
 @permission_classes((IsAuthenticated,))
 def userinfo(request,username):
     user = get_object_or_404(User,username=username)
-    return HttpResponse(dumps(user.UserProfile.advanced_info(request.user)))
+    return HttpResponse(dumps(user.userprofile.advanced_info(request.user)))
 
 
 @api_view(['GET'])
@@ -75,7 +69,7 @@ def userinfo(request,username):
 @permission_classes((IsAuthenticated,))
 def userfriends(request,username):
     user = get_object_or_404(User,username=username)
-    data = renderuserlist(request,map(lambda x:x.user,user.userprofile.friends.all()))
+    data = map(lambda x:x.basic_info(asker=request.user),user.userprofile.friends.all())
     return HttpResponse(dumps(data))
 
 
@@ -88,12 +82,11 @@ def addfriend(request,username):
     user = get_object_or_404(User,username=username)
     if not user.userprofile in sender.userprofile.friends.all():
         sender.userprofile.friends.add(user.userprofile)
+        Notification.objects.create(typeNof=0,toUser=user,userCaused=request.user.userprofile).save()
     return HttpResponse("1")
 
 
+
+#takes a list of userprofiels
 def renderuserlist(request,lst):
-    data = []
-    for user in lst:
-    	dic = user.basic_info(asker=request.user)
-        data.append(dic) 
-    return data
+    return map(lambda x:x.basic_info(asker=request.user),lst)

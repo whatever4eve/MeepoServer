@@ -57,10 +57,10 @@ class Notification(models.Model):
 	date = models.DateTimeField(default=datetime.now())
 
 	def get_info(self):
-		data = []
-		data['sender'] = self.userCaused.basic_info(asker=self.toUser)
-		data['type'] = self.typeNof
-
+		return {
+		'sender': self.userCaused.basic_info(asker=self.toUser),
+		'type' : self.typeNof
+		}
 	def time_ago(self):
 		now = datetime.now()
 		date = self.date

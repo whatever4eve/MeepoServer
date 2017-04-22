@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from datetime import date,datetime
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -22,9 +23,10 @@ class UserProfile(models.Model):
 		return self.user.username
     #takes a user,return a dict
 	def basic_info(self, asker=None):
-		data = {}
-		data['username'] = self.user.username
-		data['fullname'] = self.user.first_name + ' ' + self.user.last_name
+		data = {
+			'username' : self.user.username,
+			'fullname' : self.user.first_name + ' ' + self.user.last_name
+		}
 		if asker:
 			data['isfriend'] = self.user.userprofile in asker.userprofile.friends.all() or self.user.username == asker.username
 		else:
@@ -54,25 +56,53 @@ class Notification(models.Model):
 	typeNof = models.IntegerField(choices=msgType)
 	toUser = models.ForeignKey(User, on_delete=models.CASCADE)
 	userCaused = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-	date = models.DateTimeField(default=datetime.now())
+	date = models.DateTimeField(default=timezone.now())
 
 	def get_info(self):
 		return {
 		'sender': self.userCaused.basic_info(asker=self.toUser),
-		'type' : self.typeNof
+		'type' : self.typeNof,
+		'time_ago' : self.time_ago(),
 		}
 	def time_ago(self):
-		now = datetime.now()
+		now = timezone.now()
 		date = self.date
 		dt = now-date
+		if dt.days > 365:
+			return date.strftime('%B %d %y')
+		if dt.days > 7:
+			return date.strftime('%B %d')
 		if dt.days > 0:
-			return str(dt.days) + 'd'
+			return str(dt.days) + ' days ago'
 		if dt.seconds > 3600:
-			return str(dt.seconds/3600) +'h'
+			return str(dt.seconds/3600) +' hours ago'
 		if dt.seconds > 60:
-			return str(dt.seconds/60) + 'm'
+			return str(dt.seconds/60) + ' minutes ago'
 		if dt.seconds < 60:
 			return "now"
 		return "???"
 
 
+class BaseEvent(models.Model):
+	invites = models.ManyToManyField(UserProfile,through='AttendStatus')
+	event_id = models.IntegerField(primary_key=True)
+	admin = models.ForeignKey(User)
+	
+	
+class NormalEvent(models.Model):
+
+	pass
+
+
+atend_status = (
+    (0, 'invited'),
+    (1, 'going'),
+    (2, 'maybe'),
+    (3, 'not_going'),
+	)
+
+class AttendStatus(models.Model):
+	userprofile = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+	baseevent = models.ForeignKey(BaseEvent,on_delete=models.CASCADE)
+	status = models.IntegerField(choices=atend_status)
+		

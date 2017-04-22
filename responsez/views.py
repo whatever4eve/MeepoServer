@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -44,7 +44,7 @@ def signup(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getNotifications(request):
-    notifs = Notification.objects.filter(toUser=request.user)
+    notifs = Notification.objects.filter(toUser=request.user).order_by('-date')
     return HttpResponse(dumps(map(lambda x:x.get_info(),notifs)))
 
 
@@ -84,9 +84,3 @@ def addfriend(request,username):
         sender.userprofile.friends.add(user.userprofile)
         Notification.objects.create(typeNof=0,toUser=user,userCaused=request.user.userprofile).save()
     return HttpResponse("1")
-
-
-
-#takes a list of userprofiels
-def renderuserlist(request,lst):
-    return map(lambda x:x.basic_info(asker=request.user),lst)

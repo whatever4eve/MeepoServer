@@ -48,7 +48,7 @@ def create_normal_event(request):
 def going_users(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	users = event.users_by_status(1)
-	return HttpResponse(dumps([user.basic_info() for user in users]))
+	return HttpResponse(dumps([user.basic_info(request.user) for user in users]))
 
 
 @api_view(['GET'])
@@ -57,7 +57,7 @@ def going_users(request,event_id):
 def maybe_users(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	users = event.users_by_status(2)
-	return HttpResponse(dumps([user.basic_info() for user in users]))
+	return HttpResponse(dumps([user.basic_info(request.user) for user in users]))
 
 
 @api_view(['GET'])
@@ -66,7 +66,8 @@ def maybe_users(request,event_id):
 def invited_users(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	users = event.users_by_status(0)
-	return HttpResponse(dumps([user.basic_info() for user in users]))
+	return HttpResponse(dumps([user.basic_info(request.user) for user in users]))
+
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -75,6 +76,7 @@ def set_going(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	status = AttendStatus.objects.get(baseevent=event,userprofile=request.user.userprofile)
 	status.status = 1
+	status.save()
 	return HttpResponse(dumps(event.info_for_feed()))
 
 @api_view(['GET'])
@@ -84,6 +86,7 @@ def set_maybe(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	status = AttendStatus.objects.get(baseevent=event,userprofile=request.user.userprofile)
 	status.status = 2
+	status.save()
 	return HttpResponse(dumps(event.info_for_feed()))
 
 @api_view(['GET'])
@@ -93,4 +96,5 @@ def not_going(request,event_id):
 	event = get_object_or_404(BaseEvent,event_id=int(event_id))
 	status = AttendStatus.objects.get(baseevent=event,userprofile=request.user.userprofile)
 	status.status = 3
+	status.save()
 	return HttpResponse(dumps(event.info_for_feed()))

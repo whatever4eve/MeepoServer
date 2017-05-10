@@ -13,7 +13,7 @@ from .models import BaseEvent,AttendStatus
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def getFeed(request):
-	events=request.user.baseevent_set.all().order_by('-date_time')
+	events=request.user.baseevent_set.all().order_by('date_time')
 	data = []
 	for event in events:
 		data.append(event.info_for_feed())
